@@ -20,6 +20,12 @@ module RSpec
           @logs = []
         end
 
+        def replace_files(vars)
+          vars.each do |key, value|
+            vars[key] = 'Uploaded file' if value.class == Rack::Test::UploadedFile
+          end
+        end
+
         def after
           builder = Builder::XmlMarkup.new(:indent => 2)
           html = builder.html {
@@ -36,7 +42,7 @@ module RSpec
                 end
                 builder.span 'Params:'
                 vars = log.vars || {}
-                builder << CodeRay.scan(JSON.pretty_generate(vars), :json).div(:line_numbers => nil)
+                builder << CodeRay.scan(JSON.pretty_generate(replaces(vars)), :json).div(:line_numbers => nil)
                 builder.span 'Response:'
                 body = JSON.parse(log.body) || {}
                 builder << CodeRay.scan(JSON.pretty_generate(body), :json).div(:line_numbers => nil)
